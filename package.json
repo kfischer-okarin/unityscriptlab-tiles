@@ -1,0 +1,15 @@
+{
+    "name": "com.nostalgialab.unityscriptlab.tiles",
+    "displayName": "Unity Script Lab - Tiles",
+    "version": "0.0.1",
+    "unity": "2018.1",
+    "description": "Tiles",
+    "keywords": [
+        "unity",
+        "tiles"
+    ],
+    "category": "Unity",
+    "dependencies": {
+        "com.nsub.nsubstitute": "4.0.1"
+    }
+}
