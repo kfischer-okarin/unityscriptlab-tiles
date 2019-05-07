@@ -1,0 +1,19 @@
+{
+    "name": "UnityScriptLabTilesTests",
+    "references": [
+        "GUID:4bb64ef6662c449c59cbef59d4168ef7"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
