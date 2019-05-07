@@ -17,9 +17,9 @@ namespace UnityScriptLab.Tiles {
       this.neighborsFlag = CalcNeighborsFlag();
     }
 
-    public bool HasBottomLeft() => CheckFlag(0b_100_00_010);
+    public bool HasBottomLeft() => CheckFlag(0b_100_00_000);
     public bool HasBottom() => CheckFlag(0b_010_00_000);
-    public bool HasBottomRight() => CheckFlag(0b_001_00_010);
+    public bool HasBottomRight() => CheckFlag(0b_001_00_000);
     public bool HasLeft() => CheckFlag(0b_000_10_000);
     public bool HasRight() => CheckFlag(0b_000_01_000);
     public bool HasTopLeft() => CheckFlag(0b_000_00_100);
@@ -29,8 +29,8 @@ namespace UnityScriptLab.Tiles {
     uint CalcNeighborsFlag() {
       uint result = 0;
       uint flag = 1;
-      for (int y = -1; y <= 1; y++) {
-        for (int x = -1; x <= 1; x++) {
+      for (int y = 1; y >= -1; y--) {
+        for (int x = 1; x >= -1; x--) {
           if (x == 0 && y == 0) {
             continue;
           }
@@ -52,6 +52,10 @@ namespace UnityScriptLab.Tiles {
 
     bool CheckFlag(uint flag) {
       return (neighborsFlag & flag) == flag;
+    }
+
+    public override string ToString() {
+      return $"Neighborhood({Convert.ToString(neighborsFlag, 2)})";
     }
   }
 }
