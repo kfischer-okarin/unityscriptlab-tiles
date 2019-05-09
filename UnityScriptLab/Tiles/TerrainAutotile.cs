@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -31,6 +31,7 @@ namespace UnityScriptLab.Tiles {
       tileData.sprite = BuildSprite(tileParts);
     }
 
+    // From bottom left to top right
     enum TilePart {
       BLL,
       BL,
