@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Tilemaps;
 
 namespace UnityScriptLab.Tiles {
+  using D = Direction;
   [Serializable]
   [CreateAssetMenu(fileName = "New Terrain Auto Tile", menuName = "Tiles/Terrain Auto Tile")]
   public class TerrainAutotile : TileBase {
@@ -29,6 +31,80 @@ namespace UnityScriptLab.Tiles {
       Neighborhood neighborhood = new Neighborhood(this, tilemap, position);
       TileParts tileParts = GetTileParts(neighborhood);
       tileData.sprite = BuildSprite(tileParts);
+    }
+
+    class Corner {
+      protected Direction direction;
+
+      public Corner(Direction direction) {
+        Assert.IsTrue(direction.IsCorner());
+        this.direction = direction;
+      }
+
+      public Corner FlipHorizontal => new Corner(direction.FlipHorizontal());
+
+      public Corner FlipVertical => new Corner(direction.FlipVertical());
+
+      public virtual(int, int) Position => (direction.Contains(D.Left) ? 0 : 3, direction.Contains(D.Up) ? 3 : 0);
+
+      public override bool Equals(object obj) {
+        Corner c = obj as Corner;
+        return c != null && direction == c.direction;
+      }
+
+      public override int GetHashCode() => $"{GetType().Name}-{direction}".GetHashCode();
+    }
+
+    class ConvexCorner : Corner {
+      public ConvexCorner(Direction direction) : base(direction) { }
+
+      public override(int, int) Position => (direction.Contains(D.Left) ? 2 : 3, direction.Contains(D.Up) ? 5 : 4);
+    }
+
+    class AreaCenter : Corner {
+      public AreaCenter(Direction direction) : base(direction) { }
+
+      public override(int, int) Position => (direction.Contains(D.Left) ? 1 : 2, direction.Contains(D.Up) ? 2 : 1);
+    }
+
+    class SingleWidthCorner : Corner {
+      public SingleWidthCorner(Direction direction) : base(direction) { }
+
+      public override(int, int) Position => (direction.Contains(D.Left) ? 0 : 1, direction.Contains(D.Up) ? 5 : 4);
+    }
+
+    class Edge {
+      Direction main;
+      Direction secondary;
+
+      public Edge(Direction main, Direction secondary) {
+        Assert.IsFalse(main.IsCorner());
+        Assert.IsFalse(secondary.IsCorner());
+        Assert.IsFalse(main.SameAxis(secondary));
+        this.main = main;
+        this.secondary = secondary;
+      }
+
+      public Edge FlipHorizontal => new Edge(main.FlipHorizontal(), secondary.FlipHorizontal());
+
+      public Edge FlipVertical => new Edge(main.FlipVertical(), secondary.FlipVertical());
+
+      public (int, int) Position {
+        get {
+          if (main == D.Up || main == D.Down) {
+            return (secondary == D.Left ? 1: 2, main == D.Up ? 3 : 0);
+          } else {
+            return (main == D.Left ? 0 : 3, secondary == D.Up ? 2 : 1);
+          }
+        }
+      }
+
+      public override bool Equals(object obj) {
+        Edge e = obj as Edge;
+        return e != null && main == e.main && secondary == e.secondary;
+      }
+
+      public override int GetHashCode() => $"{GetType().Name}-{main}-{secondary}".GetHashCode();
     }
 
     // From bottom left to top right
@@ -56,7 +132,7 @@ namespace UnityScriptLab.Tiles {
       Single_TL,
       Single_TR,
       Corner_TL,
-      Corner_TR,
+      Corner_TR
     }
 
     TilePart TopLeft(Neighborhood neighborhood) {

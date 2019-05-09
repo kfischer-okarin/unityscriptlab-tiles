@@ -77,5 +77,18 @@ namespace UnityScriptLab.Tiles {
     public static bool IsCorner(this D direction) {
       return direction == D.UpRight || direction == D.DownRight || direction == D.DownLeft || direction == D.UpLeft;
     }
+
+    public static bool SameAxis(this D d, D direction) {
+      switch (d) {
+        case D.Up:
+        case D.Down:
+          return direction == D.Up || direction == D.Down;
+        case D.Left:
+        case D.Right:
+          return direction == D.Left || direction == D.Right;
+        default:
+          return false;
+      }
+    }
   }
 }
