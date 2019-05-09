@@ -8,7 +8,7 @@ namespace UnityScriptLab.Tiles {
   [Serializable]
   [CreateAssetMenu(fileName = "New Terrain Auto Tile", menuName = "Tiles/Terrain Auto Tile")]
   public class TerrainAutotile : TileBase {
-    public Tile.ColliderType colliderType;
+    public Tile.ColliderType colliderType = Tile.ColliderType.Sprite;
     public Texture2D baseTexture;
 
     public override void RefreshTile(Vector3Int location, ITilemap tileMap) {
