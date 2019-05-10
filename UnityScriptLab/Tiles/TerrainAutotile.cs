@@ -33,7 +33,13 @@ namespace UnityScriptLab.Tiles {
       tileData.sprite = BuildSprite(tileParts);
     }
 
-    class Corner {
+    interface TilePart {
+      TilePart FlipHorizontal { get; }
+      TilePart FlipVertical { get; }
+      (int, int) Position { get; }
+    }
+
+    class Corner : TilePart {
       protected Direction direction;
 
       public Corner(Direction direction) {
@@ -41,9 +47,9 @@ namespace UnityScriptLab.Tiles {
         this.direction = direction;
       }
 
-      public Corner FlipHorizontal => new Corner(direction.FlipHorizontal());
+      public TilePart FlipHorizontal => new Corner(direction.FlipHorizontal());
 
-      public Corner FlipVertical => new Corner(direction.FlipVertical());
+      public TilePart FlipVertical => new Corner(direction.FlipVertical());
 
       public virtual(int, int) Position => (direction.Contains(D.Left) ? 0 : 3, direction.Contains(D.Up) ? 3 : 0);
 
@@ -67,13 +73,13 @@ namespace UnityScriptLab.Tiles {
       public override(int, int) Position => (direction.Contains(D.Left) ? 1 : 2, direction.Contains(D.Up) ? 2 : 1);
     }
 
-    class SingleWidthCorner : Corner {
-      public SingleWidthCorner(Direction direction) : base(direction) { }
+    class SingleTileCorner : Corner {
+      public SingleTileCorner(Direction direction) : base(direction) { }
 
       public override(int, int) Position => (direction.Contains(D.Left) ? 0 : 1, direction.Contains(D.Up) ? 5 : 4);
     }
 
-    class Edge {
+    class Edge : TilePart {
       Direction main;
       Direction secondary;
 
@@ -85,9 +91,9 @@ namespace UnityScriptLab.Tiles {
         this.secondary = secondary;
       }
 
-      public Edge FlipHorizontal => new Edge(main.FlipHorizontal(), secondary.FlipHorizontal());
+      public TilePart FlipHorizontal => new Edge(main.FlipHorizontal(), secondary.FlipHorizontal());
 
-      public Edge FlipVertical => new Edge(main.FlipVertical(), secondary.FlipVertical());
+      public TilePart FlipVertical => new Edge(main.FlipVertical(), secondary.FlipVertical());
 
       public (int, int) Position {
         get {
