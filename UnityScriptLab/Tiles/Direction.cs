@@ -13,7 +13,17 @@ namespace UnityScriptLab.Tiles {
   }
 
   static class MirrorExtensions {
-    public static D FlipHorizontal(this D direction) {
+    public static D Flip(this D direction, bool horizontal = false, bool vertical = false) {
+      D result = direction;
+      if (horizontal) {
+        result = result.FlipHorizontal();
+      }
+      if (vertical) {
+        result = result.FlipVertical();
+      }
+      return result;
+    }
+    static D FlipHorizontal(this D direction) {
       switch (direction) {
         case D.UpRight:
           return D.UpLeft;
@@ -32,7 +42,7 @@ namespace UnityScriptLab.Tiles {
       }
     }
 
-    public static D FlipVertical(this D direction) {
+    static D FlipVertical(this D direction) {
       switch (direction) {
         case D.Up:
           return D.Down;

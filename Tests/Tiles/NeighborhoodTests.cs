@@ -8,6 +8,7 @@ using UnityEngine.Tilemaps;
 using UnityScriptLab.Tiles;
 
 namespace Tests.Tiles {
+  using D = Direction;
   public class NeighborhoodTests {
     TileBase tile = ScriptableObject.CreateInstance<Tile>();
     ITilemap tilemap;
@@ -21,10 +22,10 @@ namespace Tests.Tiles {
       tilemap.GetTile(new Vector3Int(1, 1, 0)).Returns(tile);
       Neighborhood n = new Neighborhood(tile, tilemap, Vector3Int.zero);
 
-      Assert.That(n.HasTop, Is.True);
-      Assert.That(n.HasLeft, Is.True);
-      Assert.That(n.HasTopRight, Is.True);
-      Assert.That(n.HasRight, Is.False);
+      Assert.That(n.Has(D.Up), Is.True);
+      Assert.That(n.Has(D.Left), Is.True);
+      Assert.That(n.Has(D.UpRight), Is.True);
+      Assert.That(n.Has(D.Right), Is.False);
     }
   }
 }

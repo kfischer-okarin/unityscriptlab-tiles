@@ -29,13 +29,12 @@ namespace UnityScriptLab.Tiles {
       tileData.color = Color.white;
       tileData.transform = Matrix4x4.identity;
       Neighborhood neighborhood = new Neighborhood(this, tilemap, position);
-      TileParts tileParts = GetTileParts(neighborhood);
+      TileParts tileParts = TileParts.Construct(neighborhood);
       tileData.sprite = BuildSprite(tileParts);
     }
 
     interface TilePart {
-      TilePart FlipHorizontal { get; }
-      TilePart FlipVertical { get; }
+      TilePart Flip(bool horizontal = false, bool vertical = false);
       (int, int) Position { get; }
     }
 
@@ -47,9 +46,7 @@ namespace UnityScriptLab.Tiles {
         this.direction = direction;
       }
 
-      public TilePart FlipHorizontal => new Corner(direction.FlipHorizontal());
-
-      public TilePart FlipVertical => new Corner(direction.FlipVertical());
+      public TilePart Flip(bool horizontal = false, bool vertical = false) => new Corner(direction.Flip(horizontal, vertical));
 
       public virtual(int, int) Position => (direction.Contains(D.Left) ? 0 : 3, direction.Contains(D.Up) ? 3 : 0);
 
@@ -91,9 +88,9 @@ namespace UnityScriptLab.Tiles {
         this.secondary = secondary;
       }
 
-      public TilePart FlipHorizontal => new Edge(main.FlipHorizontal(), secondary.FlipHorizontal());
-
-      public TilePart FlipVertical => new Edge(main.FlipVertical(), secondary.FlipVertical());
+      public TilePart Flip(bool horizontal = false, bool vertical = false) {
+        return new Edge(main.Flip(horizontal, vertical), secondary.Flip(horizontal, vertical));
+      }
 
       public (int, int) Position {
         get {
@@ -113,104 +110,50 @@ namespace UnityScriptLab.Tiles {
       public override int GetHashCode() => $"{GetType().Name}-{main}-{secondary}".GetHashCode();
     }
 
-    // From bottom left to top right
-    enum TilePart {
-      BLL,
-      BL,
-      BR,
-      BRR,
-      LB,
-      CBL,
-      CBR,
-      RB,
-      LT,
-      CTL,
-      CTR,
-      RT,
-      TLL,
-      TL,
-      TR,
-      TRR,
-      Single_BL,
-      Single_BR,
-      Corner_BL,
-      Corner_BR,
-      Single_TL,
-      Single_TR,
-      Corner_TL,
-      Corner_TR
+    static TilePart TopLeft(Neighborhood neighborhood, bool flipHorizontal = false, bool flipVertical = false) {
+      Func<D, D> applyFlip = d => d.Flip(flipHorizontal, flipVertical);
+      D up = applyFlip(D.Up);
+      D left = applyFlip(D.Left);
+      D upLeft = applyFlip(D.UpLeft);
+      D downRight = applyFlip(D.DownRight);
+      D down = applyFlip(D.Down);
+      D right = applyFlip(D.Right);
+
+      if (neighborhood.Has(up) && neighborhood.Has(left)) {
+        if (neighborhood.Has(upLeft)) {
+          return new AreaCenter(downRight);
+        } else {
+          return new ConvexCorner(upLeft);
+        }
+      }
+      if (neighborhood.Has(up) && !neighborhood.Has(left)) {
+        return new Edge(left, down);
+      }
+      if (!neighborhood.Has(up) && neighborhood.Has(left)) {
+        return new Edge(up, right);
+      }
+      if (!neighborhood.Has(up) && !neighborhood.Has(left) && neighborhood.Has(right) && neighborhood.Has(down)) {
+        return new Corner(upLeft);
+      }
+      return new SingleTileCorner(upLeft);
     }
 
-    TilePart TopLeft(Neighborhood neighborhood) {
-      if (neighborhood.HasTop() && neighborhood.HasLeft()) {
-        return neighborhood.HasTopLeft() ? TilePart.CBR : TilePart.Corner_TL;
-      }
-      if (neighborhood.HasTop() && !neighborhood.HasLeft()) {
-        return TilePart.LB;
-      }
-      if (!neighborhood.HasTop() && neighborhood.HasLeft()) {
-        return TilePart.TR;
-      }
-      if (!neighborhood.HasTop() && !neighborhood.HasLeft() && neighborhood.HasRight() && neighborhood.HasBottom()) {
-        return TilePart.TLL;
-      }
-      return TilePart.Single_TL;
-    }
-
-    TilePart TopRight(Neighborhood neighborhood) {
-      if (neighborhood.HasTop() && neighborhood.HasRight()) {
-        return neighborhood.HasTopRight() ? TilePart.CBL : TilePart.Corner_TR;
-      }
-      if (neighborhood.HasTop() && !neighborhood.HasRight()) {
-        return TilePart.RB;
-      }
-      if (!neighborhood.HasTop() && neighborhood.HasRight()) {
-        return TilePart.TL;
-      }
-      if (!neighborhood.HasTop() && !neighborhood.HasRight() && neighborhood.HasLeft() && neighborhood.HasBottom()) {
-        return TilePart.TRR;
-      }
-      return TilePart.Single_TR;
-    }
-
-    TilePart BottomLeft(Neighborhood neighborhood) {
-      if (neighborhood.HasBottom() && neighborhood.HasLeft()) {
-        return neighborhood.HasBottomLeft() ? TilePart.CTR : TilePart.Corner_BL;
-      }
-      if (neighborhood.HasBottom() && !neighborhood.HasLeft()) {
-        return TilePart.LT;
-      }
-      if (!neighborhood.HasBottom() && neighborhood.HasLeft()) {
-        return TilePart.BR;
-      }
-      if (!neighborhood.HasBottom() && !neighborhood.HasLeft() && neighborhood.HasRight() && neighborhood.HasBottom()) {
-        return TilePart.BLL;
-      }
-      return TilePart.Single_BL;
-    }
-
-    TilePart BottomRight(Neighborhood neighborhood) {
-      if (neighborhood.HasBottom() && neighborhood.HasRight()) {
-        return neighborhood.HasBottomRight() ? TilePart.CTL : TilePart.Corner_BR;
-      }
-      if (neighborhood.HasBottom() && !neighborhood.HasRight()) {
-        return TilePart.RT;
-      }
-      if (!neighborhood.HasBottom() && neighborhood.HasRight()) {
-        return TilePart.BL;
-      }
-      if (!neighborhood.HasBottom() && !neighborhood.HasRight() && neighborhood.HasLeft() && neighborhood.HasBottom()) {
-        return TilePart.BRR;
-      }
-      return TilePart.Single_BR;
-    }
     struct TileParts {
       public TilePart topLeft;
       public TilePart topRight;
       public TilePart bottomLeft;
       public TilePart bottomRight;
 
-      public TileParts(TilePart bottomLeft, TilePart bottomRight, TilePart topLeft, TilePart topRight) {
+      public static TileParts Construct(Neighborhood neighborhood) {
+        return new TileParts(
+          TopLeft(neighborhood),
+          TopLeft(neighborhood, flipHorizontal: true),
+          TopLeft(neighborhood, flipVertical: true),
+          TopLeft(neighborhood, flipHorizontal: true, flipVertical: true)
+        );
+      }
+
+      TileParts(TilePart topLeft, TilePart topRight, TilePart bottomLeft, TilePart bottomRight) {
         this.topLeft = topLeft;
         this.topRight = topRight;
         this.bottomLeft = bottomLeft;
@@ -220,10 +163,6 @@ namespace UnityScriptLab.Tiles {
       public override string ToString() {
         return $"TileParts({topLeft}, {topRight}, {bottomLeft}, {bottomRight})";
       }
-    }
-
-    TileParts GetTileParts(Neighborhood neighborhood) {
-      return new TileParts(BottomLeft(neighborhood), BottomRight(neighborhood), TopLeft(neighborhood), TopRight(neighborhood));
     }
 
     Dictionary<TileParts, Sprite> sprites = new Dictionary<TileParts, Sprite>();
@@ -257,7 +196,8 @@ namespace UnityScriptLab.Tiles {
 
     (int, int) TilePartPosition(TilePart part) {
       (int width, int height) = PartDimensions;
-      return (width * ((int) part % 4), height * ((int) part / 4));
+      (int x, int y) = part.Position;
+      return (width * x, height * y);
     }
   }
 }

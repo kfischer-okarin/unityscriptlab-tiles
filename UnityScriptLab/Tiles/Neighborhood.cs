@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace UnityScriptLab.Tiles {
+  using D = Direction;
   public class Neighborhood {
     TileBase tile;
     ITilemap tilemap;
@@ -17,14 +18,28 @@ namespace UnityScriptLab.Tiles {
       this.neighborsFlag = CalcNeighborsFlag();
     }
 
-    public bool HasBottomLeft() => CheckFlag(0b_100_00_000);
-    public bool HasBottom() => CheckFlag(0b_010_00_000);
-    public bool HasBottomRight() => CheckFlag(0b_001_00_000);
-    public bool HasLeft() => CheckFlag(0b_000_10_000);
-    public bool HasRight() => CheckFlag(0b_000_01_000);
-    public bool HasTopLeft() => CheckFlag(0b_000_00_100);
-    public bool HasTop() => CheckFlag(0b_000_00_010);
-    public bool HasTopRight() => CheckFlag(0b_000_00_001);
+    public bool Has(Direction direction) {
+      switch (direction) {
+        case D.DownLeft:
+          return CheckFlag(0b_100_00_000);
+        case D.Down:
+          return CheckFlag(0b_010_00_000);
+        case D.DownRight:
+          return CheckFlag(0b_001_00_000);
+        case D.Left:
+          return CheckFlag(0b_000_10_000);
+        case D.Right:
+          return CheckFlag(0b_000_01_000);
+        case D.UpLeft:
+          return CheckFlag(0b_000_00_100);
+        case D.Up:
+          return CheckFlag(0b_000_00_010);
+        case D.UpRight:
+          return CheckFlag(0b_000_00_001);
+        default:
+          return false;
+      }
+    }
 
     uint CalcNeighborsFlag() {
       uint result = 0;
