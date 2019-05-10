@@ -30,7 +30,11 @@ namespace UnityScriptLab.Tiles {
       tileData.transform = Matrix4x4.identity;
       Neighborhood neighborhood = new Neighborhood(this, tilemap, position);
       TileParts tileParts = TileParts.Construct(neighborhood);
-      tileData.sprite = BuildSprite(tileParts);
+
+      if (!sprites.ContainsKey(tileParts)) {
+        sprites[tileParts] = BuildSprite(tileParts);
+      }
+      tileData.sprite = sprites[tileParts];
     }
 
     interface TilePart {
@@ -168,9 +172,6 @@ namespace UnityScriptLab.Tiles {
     Dictionary<TileParts, Sprite> sprites = new Dictionary<TileParts, Sprite>();
 
     Sprite BuildSprite(TileParts tileParts) {
-      if (sprites.ContainsKey(tileParts)) {
-        return sprites[tileParts];
-      }
       (int width, int height) = PartDimensions;
       Texture2D target = new Texture2D(width * 2, height * 2);
 
@@ -187,9 +188,7 @@ namespace UnityScriptLab.Tiles {
       target.SetPixels(width, height, width, height, baseTexture.GetPixels(x, y, width, height));
       target.Apply();
 
-      Sprite result = Sprite.Create(target, new Rect(0, 0, width * 2, height * 2), new Vector2(0.5f, 0.5f), width * 2);
-      sprites[tileParts] = result;
-      return result;
+      return Sprite.Create(target, new Rect(0, 0, width * 2, height * 2), new Vector2(0.5f, 0.5f), width * 2);
     }
 
     (int, int) PartDimensions => (baseTexture.width / 4, baseTexture.height / 6);
