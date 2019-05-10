@@ -1,4 +1,4 @@
-namespace UnityScriptLab.Tiles {
+namespace UnityScriptLab.Tiles.Util {
   using D = Direction;
 
   public enum Direction {

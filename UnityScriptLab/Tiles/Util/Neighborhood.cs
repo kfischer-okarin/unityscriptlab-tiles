@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace UnityScriptLab.Tiles {
+namespace UnityScriptLab.Tiles.Util {
   using D = Direction;
   public class Neighborhood {
     TileBase tile;

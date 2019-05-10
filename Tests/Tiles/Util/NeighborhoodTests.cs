@@ -6,8 +6,9 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 using UnityScriptLab.Tiles;
+using UnityScriptLab.Tiles.Util;
 
-namespace Tests.Tiles {
+namespace Tests.Tiles.Util {
   using D = Direction;
   public class NeighborhoodTests {
     TileBase tile = ScriptableObject.CreateInstance<Tile>();

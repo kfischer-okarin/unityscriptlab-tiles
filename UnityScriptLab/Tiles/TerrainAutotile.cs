@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Tilemaps;
 
+using UnityScriptLab.Tiles.Util;
+
 namespace UnityScriptLab.Tiles {
   using D = Direction;
 
