@@ -88,7 +88,7 @@ namespace UnityScriptLab.Tiles {
       return direction == D.UpRight || direction == D.DownRight || direction == D.DownLeft || direction == D.UpLeft;
     }
 
-    public static bool SameAxis(this D d, D direction) {
+    public static bool IsOnSameAxis(this D d, D direction) {
       switch (d) {
         case D.Up:
         case D.Down:

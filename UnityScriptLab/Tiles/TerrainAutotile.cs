@@ -83,7 +83,7 @@ namespace UnityScriptLab.Tiles {
       public Edge(Direction main, Direction secondary) {
         Assert.IsFalse(main.IsCorner());
         Assert.IsFalse(secondary.IsCorner());
-        Assert.IsFalse(main.SameAxis(secondary));
+        Assert.IsFalse(main.IsOnSameAxis(secondary));
         this.main = main;
         this.secondary = secondary;
       }
