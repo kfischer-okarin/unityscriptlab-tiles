@@ -11,7 +11,7 @@ namespace UnityScriptLab.Tiles {
   using D = Direction;
 
   [Serializable]
-  [CreateAssetMenu(fileName = "New Terrain Auto Tile", menuName = "Tiles/Terrain Auto Tile")]
+  [CreateAssetMenu(fileName = "New Terrain Autotile", menuName = "Tiles/Terrain Autotile")]
   public class TerrainAutotile : TileBase {
     public Tile.ColliderType colliderType = Tile.ColliderType.Sprite;
     public Texture2D baseTexture;
