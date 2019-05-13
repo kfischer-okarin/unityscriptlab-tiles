@@ -43,17 +43,17 @@ namespace UnityScriptLab.Tiles {
     }
 
     struct TileParts {
-      public TilePart topLeft;
-      public TilePart topRight;
-      public TilePart bottomLeft;
-      public TilePart bottomRight;
+      public (int, int) topLeft;
+      public (int, int) topRight;
+      public (int, int) bottomLeft;
+      public (int, int) bottomRight;
 
       public static TileParts Construct(Neighborhood neighborhood) {
         return new TileParts(
-          TopLeft(neighborhood),
-          TopLeft(neighborhood, flipHorizontal : true),
-          TopLeft(neighborhood, flipVertical : true),
-          TopLeft(neighborhood, flipHorizontal : true, flipVertical : true)
+          TopLeft(neighborhood).Position,
+          TopLeft(neighborhood, flipHorizontal : true).Position,
+          TopLeft(neighborhood, flipVertical : true).Position,
+          TopLeft(neighborhood, flipHorizontal : true, flipVertical : true).Position
         );
       }
 
@@ -61,7 +61,7 @@ namespace UnityScriptLab.Tiles {
         return $"TileParts({topLeft}, {topRight}, {bottomLeft}, {bottomRight})";
       }
 
-      TileParts(TilePart topLeft, TilePart topRight, TilePart bottomLeft, TilePart bottomRight) {
+      TileParts((int, int) topLeft, (int, int) topRight, (int, int) bottomLeft, (int, int) bottomRight) {
         this.topLeft = topLeft;
         this.topRight = topRight;
         this.bottomLeft = bottomLeft;
@@ -101,17 +101,10 @@ namespace UnityScriptLab.Tiles {
       (int width, int height) = PartDimensions;
       Texture2D target = new Texture2D(width * 2, height * 2);
 
-      int x;
-      int y;
-
-      (x, y) = TilePartPosition(tileParts.bottomLeft);
-      target.SetPixels(0, 0, width, height, baseTexture.GetPixels(x, y, width, height));
-      (x, y) = TilePartPosition(tileParts.bottomRight);
-      target.SetPixels(width, 0, width, height, baseTexture.GetPixels(x, y, width, height));
-      (x, y) = TilePartPosition(tileParts.topLeft);
-      target.SetPixels(0, height, width, height, baseTexture.GetPixels(x, y, width, height));
-      (x, y) = TilePartPosition(tileParts.topRight);
-      target.SetPixels(width, height, width, height, baseTexture.GetPixels(x, y, width, height));
+      target.SetPixels(0, 0, width, height, TilePartPixels(tileParts.bottomLeft));
+      target.SetPixels(width, 0, width, height, TilePartPixels(tileParts.bottomRight));
+      target.SetPixels(0, height, width, height, TilePartPixels(tileParts.topLeft));
+      target.SetPixels(width, height, width, height, TilePartPixels(tileParts.topRight));
       target.Apply();
 
       return Sprite.Create(target, new Rect(0, 0, width * 2, height * 2), new Vector2(0.5f, 0.5f), width * 2);
@@ -119,10 +112,9 @@ namespace UnityScriptLab.Tiles {
 
     (int, int) PartDimensions => (baseTexture.width / 4, baseTexture.height / 6);
 
-    (int, int) TilePartPosition(TilePart part) {
+    Color[] TilePartPixels((int, int) position) {
       (int width, int height) = PartDimensions;
-      (int x, int y) = part.Position;
-      return (width * x, height * y);
+      return baseTexture.GetPixels(width * position.Item1, height * position.Item2, width, height);
     }
 
     interface TilePart {
@@ -141,13 +133,6 @@ namespace UnityScriptLab.Tiles {
       public TilePart Flip(bool horizontal = false, bool vertical = false) => new Corner(direction.Flip(horizontal, vertical));
 
       public virtual(int, int) Position => (direction.Contains(D.Left) ? 0 : 3, direction.Contains(D.Up) ? 3 : 0);
-
-      public override bool Equals(object obj) {
-        Corner c = obj as Corner;
-        return c != null && direction == c.direction;
-      }
-
-      public override int GetHashCode() => $"{GetType().Name}-{direction}".GetHashCode();
     }
 
     class ConvexCorner : Corner {
@@ -193,13 +178,6 @@ namespace UnityScriptLab.Tiles {
           }
         }
       }
-
-      public override bool Equals(object obj) {
-        Edge e = obj as Edge;
-        return e != null && main == e.main && secondary == e.secondary;
-      }
-
-      public override int GetHashCode() => $"{GetType().Name}-{main}-{secondary}".GetHashCode();
     }
   }
 }
