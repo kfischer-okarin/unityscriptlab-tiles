@@ -47,10 +47,10 @@ namespace UnityScriptLab.Tiles {
     }
 
     struct TileParts {
-      public (int, int) topLeft;
-      public (int, int) topRight;
-      public (int, int) bottomLeft;
-      public (int, int) bottomRight;
+      public(int, int) topLeft;
+      public(int, int) topRight;
+      public(int, int) bottomLeft;
+      public(int, int) bottomRight;
 
       public static TileParts Construct(Neighborhood neighborhood) {
         return new TileParts(
