@@ -42,6 +42,10 @@ namespace UnityScriptLab.Tiles {
       tileData.sprite = sprites[tileParts];
     }
 
+    void OnValidate() {
+      Assert.IsTrue(baseTexture.isReadable, "baseTexture must be readable");
+    }
+
     struct TileParts {
       public (int, int) topLeft;
       public (int, int) topRight;
@@ -98,6 +102,9 @@ namespace UnityScriptLab.Tiles {
     }
 
     Sprite BuildSprite(TileParts tileParts) {
+      if (!baseTexture.isReadable) {
+        return null;
+      }
       (int width, int height) = PartDimensions;
       Texture2D target = new Texture2D(width * 2, height * 2, baseTexture.format, false);
       target.filterMode = baseTexture.filterMode;
