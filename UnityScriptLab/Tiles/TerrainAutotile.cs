@@ -108,6 +108,7 @@ namespace UnityScriptLab.Tiles {
       (int width, int height) = PartDimensions;
       Texture2D target = new Texture2D(width * 2, height * 2, baseTexture.format, false);
       target.filterMode = baseTexture.filterMode;
+      target.anisoLevel = baseTexture.anisoLevel;
 
       target.SetPixels(0, 0, width, height, TilePartPixels(tileParts.bottomLeft));
       target.SetPixels(width, 0, width, height, TilePartPixels(tileParts.bottomRight));
