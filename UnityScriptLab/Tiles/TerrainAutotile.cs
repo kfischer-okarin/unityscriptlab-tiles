@@ -16,6 +16,7 @@ namespace UnityScriptLab.Tiles {
     public Tile.ColliderType colliderType = Tile.ColliderType.Sprite;
     public Texture2D baseTexture;
 
+    [SerializeField]
     Dictionary<TileParts, Sprite> sprites = new Dictionary<TileParts, Sprite>();
 
     public override void RefreshTile(Vector3Int location, ITilemap tileMap) {
