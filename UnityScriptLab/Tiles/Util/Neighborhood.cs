@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -10,6 +11,18 @@ namespace UnityScriptLab.Tiles.Util {
 
     public Neighborhood(TileBase tile, ITilemap tilemap, Vector3Int position) {
       this.neighborsFlag = FlagCalculator.Calc(tile, tilemap, position);
+    }
+
+    public Neighborhood(uint neighborsFlag) {
+      this.neighborsFlag = neighborsFlag;
+    }
+
+    public static List<Neighborhood> All() {
+      List<Neighborhood> result = new List<Neighborhood>();
+      for(uint i = 0b_000_00_000; i <= 0b_111_11_111; i++) {
+        result.Add(new Neighborhood(i));
+      }
+      return result;
     }
 
     public bool Has(Direction direction) {
