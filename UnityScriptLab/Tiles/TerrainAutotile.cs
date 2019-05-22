@@ -13,12 +13,9 @@ namespace UnityScriptLab.Tiles {
 
   [Serializable]
   [CreateAssetMenu(fileName = "New Terrain Autotile", menuName = "Tiles/Terrain Autotile")]
-  public class TerrainAutotile : TileBase {
+  public class TerrainAutotile : TileBase, ISerializationCallbackReceiver {
     public Tile.ColliderType colliderType = Tile.ColliderType.Sprite;
     public Texture2D baseTexture;
-
-    [SerializeField]
-    Dictionary<TileParts, Sprite> sprites = new Dictionary<TileParts, Sprite>();
 
     public override void RefreshTile(Vector3Int location, ITilemap tileMap) {
       for (int y = -1; y <= 1; y++)
@@ -31,6 +28,40 @@ namespace UnityScriptLab.Tiles {
         }
     }
 
+    Dictionary<TileParts, Sprite> sprites = new Dictionary<TileParts, Sprite>();
+
+    public IEnumerable<Sprite> Sprites => sprites.Values;
+
+    public void CalcSprites() {
+      sprites.Clear();
+      foreach (Neighborhood n in Neighborhood.All()) {
+        TileParts tileParts = TileParts.Construct(n);
+        if (!sprites.ContainsKey(tileParts)) {
+          sprites[tileParts] = BuildSprite(tileParts);
+        }
+      }
+    }
+
+    [SerializeField]
+    List<TileParts> _spriteKeys = new List<TileParts>();
+    [SerializeField]
+    List<Sprite> _spriteValues = new List<Sprite>();
+    public void OnBeforeSerialize() {
+      _spriteKeys.Clear();
+      _spriteValues.Clear();
+      foreach (KeyValuePair<TileParts, Sprite> kvp in sprites) {
+        _spriteKeys.Add(kvp.Key);
+        _spriteValues.Add(kvp.Value);
+      }
+    }
+
+    public void OnAfterDeserialize() {
+      sprites.Clear();
+      for (int i = 0; i < _spriteKeys.Count; i++) {
+        sprites.Add(_spriteKeys[i], _spriteValues[i]);
+      }
+    }
+
     public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData) {
       tileData.colliderType = colliderType;
       tileData.color = Color.white;
@@ -38,10 +69,9 @@ namespace UnityScriptLab.Tiles {
       Neighborhood neighborhood = new Neighborhood(this, tilemap, position);
       TileParts tileParts = TileParts.Construct(neighborhood);
 
-      if (!sprites.ContainsKey(tileParts)) {
-        sprites[tileParts] = BuildSprite(tileParts);
+      if (sprites.ContainsKey(tileParts)) {
+        tileData.sprite = sprites[tileParts];
       }
-      tileData.sprite = sprites[tileParts];
     }
 
     void OnValidate() {
