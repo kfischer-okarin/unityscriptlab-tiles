@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -47,33 +48,59 @@ namespace UnityScriptLab.Tiles {
       Assert.IsTrue(baseTexture.isReadable, "baseTexture must be readable");
     }
 
-    struct TileParts {
-      public(int, int) topLeft;
-      public(int, int) topRight;
-      public(int, int) bottomLeft;
-      public(int, int) bottomRight;
+    [Serializable]
+    public struct TileParts {
+      public(int, int) TopLeft => (partCoordinates[0], partCoordinates[1]);
+      public(int, int) TopRight => (partCoordinates[2], partCoordinates[3]);
+      public(int, int) BottomLeft => (partCoordinates[4], partCoordinates[5]);
+      public(int, int) BottomRight => (partCoordinates[6], partCoordinates[7]);
+
+      [SerializeField]
+      List<int> partCoordinates;
 
       public static TileParts Construct(Neighborhood neighborhood) {
         return new TileParts(
-          TopLeft(neighborhood).Position,
-          TopLeft(neighborhood, flipHorizontal : true).Position,
-          TopLeft(neighborhood, flipVertical : true).Position,
-          TopLeft(neighborhood, flipHorizontal : true, flipVertical : true).Position
+          CalcTopLeft(neighborhood).Position,
+          CalcTopLeft(neighborhood, flipHorizontal : true).Position,
+          CalcTopLeft(neighborhood, flipVertical : true).Position,
+          CalcTopLeft(neighborhood, flipHorizontal : true, flipVertical : true).Position
         );
       }
 
       public override string ToString() {
-        return $"TileParts({topLeft}, {topRight}, {bottomLeft}, {bottomRight})";
+        return $"TileParts({TopLeft}, {TopRight}, {BottomLeft}, {BottomRight})";
       }
 
       TileParts((int, int) topLeft, (int, int) topRight, (int, int) bottomLeft, (int, int) bottomRight) {
-        this.topLeft = topLeft;
-        this.topRight = topRight;
-        this.bottomLeft = bottomLeft;
-        this.bottomRight = bottomRight;
+        this.partCoordinates = new List<int> {
+          topLeft.Item1,
+          topLeft.Item2,
+          topRight.Item1,
+          topRight.Item2,
+          bottomLeft.Item1,
+          bottomLeft.Item2,
+          bottomRight.Item1,
+          bottomRight.Item2
+        };
       }
 
-      static TilePart TopLeft(Neighborhood neighborhood, bool flipHorizontal = false, bool flipVertical = false) {
+      public override bool Equals(object obj) {
+        if (!(obj is TileParts)) {
+          return false;
+        }
+
+        TileParts self = this;
+        TileParts other = (TileParts) obj;
+
+        return Enumerable.Range(0, 8).All(i => self.partCoordinates[i] == other.partCoordinates[i]);
+      }
+
+      public override int GetHashCode() {
+        string stringToHash = String.Join(",", partCoordinates.ConvertAll(i => i.ToString()));
+        return stringToHash.GetHashCode();
+      }
+
+      static TilePart CalcTopLeft(Neighborhood neighborhood, bool flipHorizontal = false, bool flipVertical = false) {
         Func<D, D> applyFlip = d => d.Flip(flipHorizontal, flipVertical);
         D up = applyFlip(D.Up);
         D left = applyFlip(D.Left);
@@ -111,10 +138,10 @@ namespace UnityScriptLab.Tiles {
       target.filterMode = baseTexture.filterMode;
       target.anisoLevel = baseTexture.anisoLevel;
 
-      target.SetPixels(0, 0, width, height, TilePartPixels(tileParts.bottomLeft));
-      target.SetPixels(width, 0, width, height, TilePartPixels(tileParts.bottomRight));
-      target.SetPixels(0, height, width, height, TilePartPixels(tileParts.topLeft));
-      target.SetPixels(width, height, width, height, TilePartPixels(tileParts.topRight));
+      target.SetPixels(0, 0, width, height, TilePartPixels(tileParts.BottomLeft));
+      target.SetPixels(width, 0, width, height, TilePartPixels(tileParts.BottomRight));
+      target.SetPixels(0, height, width, height, TilePartPixels(tileParts.TopLeft));
+      target.SetPixels(width, height, width, height, TilePartPixels(tileParts.TopRight));
       target.Apply();
 
       return Sprite.Create(target, new Rect(0, 0, width * 2, height * 2), new Vector2(0.5f, 0.5f), width * 2);
