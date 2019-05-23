@@ -1,3 +1,8 @@
+# v2.0.0
+
+## Improvements
+* Terrain Autotile: Pre-generate tile sprites and save them in the asset
+
 # v1.0.1
 
 ## Improvements
