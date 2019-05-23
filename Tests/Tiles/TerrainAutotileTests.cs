@@ -19,6 +19,7 @@ namespace Tests.Tiles {
       tile = ScriptableObject.CreateInstance<TerrainAutotile>();
       tile.baseTexture = BuildFakeTexture();
       result = new TileData();
+      tile.CalcSprites();
     }
 
     Color[,] texture = new Color[4, 6];
